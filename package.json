@@ -11,9 +11,13 @@
   },
   "dependencies": {
     "express": "^4.17.1",
-    "discord.js": "^11.6.4",
     "querystring": "^0.2.0",
-    "crypto": "^1.0.1"
+    "discord.js": "^12.5.3",
+    "axios": "^0.24.0",
+    "qs": "^6.10.2",
+    "discord.js-buttons": "^1.0.0",
+    "keyv": "^4.0.4",
+    "@keyv/sqlite": "^2.0.4"
   },
   "engines": {
     "node": "12.x"
