@@ -38,7 +38,7 @@ http.createServer(function(req, res){
 
 client.on('ready', message =>{
  console.log('Bot準備完了～');
- client.user.setPresence({ activity: { name: 'メンションでBOTを起動' } });
+ client.user.setActivity(":start", {type: "WATCHING"});
 });
 
 client.on('message', async message =>{
@@ -46,48 +46,7 @@ client.on('message', async message =>{
    return;
  }
  if(message.mentions.has(client.user)){
-   //sendReply(message, "呼びましたか？");
-   await message.delete({ timeout: 0 })
-   //const reply = await message.channel.send('何する？', button);
-   const server = await servers.get(client.user.id);
-   const serverbuttons = [];
-   for (let i = 0; i < server.servers.length; i++) {
-    //message.channel.send(`${i}番目:${server.servers[i].neme}`)
-    const button = new discordbtn.MessageButton()
-    .setStyle('green')
-    .setLabel(`${server.servers[i].neme}サーバーを起動`)
-    .setID(`server${i}`);
-    //serverbuttons.push(new discordbtn.MessageButton().setStyle('green').setLabel(`${server.servers[i].neme}サーバーを起動`).setID('scan'))
-    const reply = await message.channel.send(`${server.servers[i].neme}サーバー`,button)
-    client.on('clickButton', async (button) => {
-      if(button.id===`server${i}`){
-        button.defer(false);
-        message.channel.send(`${server.servers[i].neme}サーバーを起動中...`);
-        start_exe(server.servers[i].Cookie);
-        const messages = await message.channel.messages.fetch({ limit: 100 })
-        // ボット以外が送信したメッセージを抽出
-        const filtered = messages.filter(message => message.author.bot)
-        // それらのメッセージを一括削除
-        message.channel.bulkDelete(filtered)
-      }
-    });
-   }
-                         
-   const button = new discordbtn.MessageButton()
-    .setStyle('green')
-    .setLabel('やっぱり起動しない')
-    .setID('back');
-   const reply = await message.channel.send(`やっぱり起動しない`,button)
-   client.on('clickButton', async (button) => {
-     if(button.id==='back'){
-       button.defer(false);
-       const messages = await message.channel.messages.fetch({ limit: 100 })
-       const filtered = messages.filter(message => message.author.bot)
-       // それらのメッセージを一括削除
-       message.channel.bulkDelete(filtered)
-     }
-     　　
-   });
+   sendReply(message, "呼びましたか？");
    return;
  }
  
@@ -96,39 +55,17 @@ client.on('message', async message =>{
    sendMsg(message.channel.id, text);
    return;
  }
- /*if (message.content.match(/test/)){
-   let text = "i";
-   sendMsg(message.channel.id, text);
-   text = "a";
-   sendMsg(message.channel.id, text);
-   console.log(client.user)
-   return;
- }*/
  const args = message.content.slice(":".length).trim().split(' ');
  const command = args.shift().toLowerCase();
  if (command==='gets') {
-		message.channel.send(`${args[0].split('||')[1]}サーバーの情報を取得`);
-    getserver(message.channel.id,args[0].split('||')[1])
+		message.channel.send(`${args[0]}サーバーの情報を取得`);
+    getserver(message.channel.id,args[0])
  }else if(command==='start'){
    message.channel.send('サーバーを起動中...');
-   start_exe(message.channel.id);
+   start_exe();
  }else if(command==='stop'){
    message.channel.send('サーバーを停止中...');
-   stop_exe(message.channel.id);
- }else if(command==='add'){
-   message.delete({ timeout: 0 })
-   message.channel.send(`新しい${args[0]}サーバーを追加！！`);
-   const server = (await servers.get(client.user.id)) || { servers:[] };
-   server.servers.push({neme:args[0],Cookie:args[1].split('||')[1]})
-   servers.set(client.user.id, server);
-   console.log(server)
- }else if(command==='delete'){
-   const server = await servers.get(client.user.id);
-   message.channel.send(`${args[0]}番目の${server.servers[args[0]].neme}サーバーを削除！！`);
-   server.servers.splice(args[0],1)
-   servers.set(client.user.id, server);
-   console.log(await servers.get(client.user.id))
-   console.log(server)
+   stop_exe();
  }
 });
 
@@ -186,14 +123,14 @@ function getserver(channelId,uuid){
   }))
 }
 
-function start_exe(cookie){
+function start_exe(){
   const data = { 'start': '','dlpass': ''};
   axios.post('https://dash.zpw.jp/pages/ ',
     qs.stringify(data),
     {
       headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Cookie': 'PHPSESSID='+cookie
+          'Cookie': 'PHPSESSID='+process.env.Cookie
       }
     })
     .then((response)=> {
@@ -211,7 +148,7 @@ function stop_exe(){
     {
       headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Cookie': 'PHPSESSID=fdmmejr1gf64qbmj7du8708c6e'
+          'Cookie': 'PHPSESSID='+process.env.Cookie
       }
     })
     .then((response)=> {
@@ -220,4 +157,4 @@ function stop_exe(){
     .catch((error)=> {
         console.log(error)
   })
-} 
+}
